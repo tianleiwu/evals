@@ -1,0 +1,464 @@
+match_mmlu:
+  id: match_mmlu.test.v1
+  metrics:
+  - accuracy
+match_mmlu.test.v1:
+  args:
+    samples_jsonl: mmlu/all/samples.jsonl
+  class: evals.elsuite.basic.match:Match
+match_mmlu_abstract_algebra:
+  id: match_mmlu_abstract_algebra.test.v1
+  metrics:
+  - accuracy
+match_mmlu_abstract_algebra.test.v1:
+  args:
+    samples_jsonl: mmlu/abstract_algebra/samples.jsonl
+  class: evals.elsuite.basic.match:Match
+match_mmlu_anatomy:
+  id: match_mmlu_anatomy.test.v1
+  metrics:
+  - accuracy
+match_mmlu_anatomy.test.v1:
+  args:
+    samples_jsonl: mmlu/anatomy/samples.jsonl
+  class: evals.elsuite.basic.match:Match
+match_mmlu_astronomy:
+  id: match_mmlu_astronomy.test.v1
+  metrics:
+  - accuracy
+match_mmlu_astronomy.test.v1:
+  args:
+    samples_jsonl: mmlu/astronomy/samples.jsonl
+  class: evals.elsuite.basic.match:Match
+match_mmlu_business_ethics:
+  id: match_mmlu_business_ethics.test.v1
+  metrics:
+  - accuracy
+match_mmlu_business_ethics.test.v1:
+  args:
+    samples_jsonl: mmlu/business_ethics/samples.jsonl
+  class: evals.elsuite.basic.match:Match
+match_mmlu_clinical_knowledge:
+  id: match_mmlu_clinical_knowledge.test.v1
+  metrics:
+  - accuracy
+match_mmlu_clinical_knowledge.test.v1:
+  args:
+    samples_jsonl: mmlu/clinical_knowledge/samples.jsonl
+  class: evals.elsuite.basic.match:Match
+match_mmlu_college_biology:
+  id: match_mmlu_college_biology.test.v1
+  metrics:
+  - accuracy
+match_mmlu_college_biology.test.v1:
+  args:
+    samples_jsonl: mmlu/college_biology/samples.jsonl
+  class: evals.elsuite.basic.match:Match
+match_mmlu_college_chemistry:
+  id: match_mmlu_college_chemistry.test.v1
+  metrics:
+  - accuracy
+match_mmlu_college_chemistry.test.v1:
+  args:
+    samples_jsonl: mmlu/college_chemistry/samples.jsonl
+  class: evals.elsuite.basic.match:Match
+match_mmlu_college_computer_science:
+  id: match_mmlu_college_computer_science.test.v1
+  metrics:
+  - accuracy
+match_mmlu_college_computer_science.test.v1:
+  args:
+    samples_jsonl: mmlu/college_computer_science/samples.jsonl
+  class: evals.elsuite.basic.match:Match
+match_mmlu_college_mathematics:
+  id: match_mmlu_college_mathematics.test.v1
+  metrics:
+  - accuracy
+match_mmlu_college_mathematics.test.v1:
+  args:
+    samples_jsonl: mmlu/college_mathematics/samples.jsonl
+  class: evals.elsuite.basic.match:Match
+match_mmlu_college_medicine:
+  id: match_mmlu_college_medicine.test.v1
+  metrics:
+  - accuracy
+match_mmlu_college_medicine.test.v1:
+  args:
+    samples_jsonl: mmlu/college_medicine/samples.jsonl
+  class: evals.elsuite.basic.match:Match
+match_mmlu_college_physics:
+  id: match_mmlu_college_physics.test.v1
+  metrics:
+  - accuracy
+match_mmlu_college_physics.test.v1:
+  args:
+    samples_jsonl: mmlu/college_physics/samples.jsonl
+  class: evals.elsuite.basic.match:Match
+match_mmlu_computer_security:
+  id: match_mmlu_computer_security.test.v1
+  metrics:
+  - accuracy
+match_mmlu_computer_security.test.v1:
+  args:
+    samples_jsonl: mmlu/computer_security/samples.jsonl
+  class: evals.elsuite.basic.match:Match
+match_mmlu_conceptual_physics:
+  id: match_mmlu_conceptual_physics.test.v1
+  metrics:
+  - accuracy
+match_mmlu_conceptual_physics.test.v1:
+  args:
+    samples_jsonl: mmlu/conceptual_physics/samples.jsonl
+  class: evals.elsuite.basic.match:Match
+match_mmlu_econometrics:
+  id: match_mmlu_econometrics.test.v1
+  metrics:
+  - accuracy
+match_mmlu_econometrics.test.v1:
+  args:
+    samples_jsonl: mmlu/econometrics/samples.jsonl
+  class: evals.elsuite.basic.match:Match
+match_mmlu_electrical_engineering:
+  id: match_mmlu_electrical_engineering.test.v1
+  metrics:
+  - accuracy
+match_mmlu_electrical_engineering.test.v1:
+  args:
+    samples_jsonl: mmlu/electrical_engineering/samples.jsonl
+  class: evals.elsuite.basic.match:Match
+match_mmlu_elementary_mathematics:
+  id: match_mmlu_elementary_mathematics.test.v1
+  metrics:
+  - accuracy
+match_mmlu_elementary_mathematics.test.v1:
+  args:
+    samples_jsonl: mmlu/elementary_mathematics/samples.jsonl
+  class: evals.elsuite.basic.match:Match
+match_mmlu_formal_logic:
+  id: match_mmlu_formal_logic.test.v1
+  metrics:
+  - accuracy
+match_mmlu_formal_logic.test.v1:
+  args:
+    samples_jsonl: mmlu/formal_logic/samples.jsonl
+  class: evals.elsuite.basic.match:Match
+match_mmlu_global_facts:
+  id: match_mmlu_global_facts.test.v1
+  metrics:
+  - accuracy
+match_mmlu_global_facts.test.v1:
+  args:
+    samples_jsonl: mmlu/global_facts/samples.jsonl
+  class: evals.elsuite.basic.match:Match
+match_mmlu_high_school_biology:
+  id: match_mmlu_high_school_biology.test.v1
+  metrics:
+  - accuracy
+match_mmlu_high_school_biology.test.v1:
+  args:
+    samples_jsonl: mmlu/high_school_biology/samples.jsonl
+  class: evals.elsuite.basic.match:Match
+match_mmlu_high_school_chemistry:
+  id: match_mmlu_high_school_chemistry.test.v1
+  metrics:
+  - accuracy
+match_mmlu_high_school_chemistry.test.v1:
+  args:
+    samples_jsonl: mmlu/high_school_chemistry/samples.jsonl
+  class: evals.elsuite.basic.match:Match
+match_mmlu_high_school_computer_science:
+  id: match_mmlu_high_school_computer_science.test.v1
+  metrics:
+  - accuracy
+match_mmlu_high_school_computer_science.test.v1:
+  args:
+    samples_jsonl: mmlu/high_school_computer_science/samples.jsonl
+  class: evals.elsuite.basic.match:Match
+match_mmlu_high_school_european_history:
+  id: match_mmlu_high_school_european_history.test.v1
+  metrics:
+  - accuracy
+match_mmlu_high_school_european_history.test.v1:
+  args:
+    samples_jsonl: mmlu/high_school_european_history/samples.jsonl
+  class: evals.elsuite.basic.match:Match
+match_mmlu_high_school_geography:
+  id: match_mmlu_high_school_geography.test.v1
+  metrics:
+  - accuracy
+match_mmlu_high_school_geography.test.v1:
+  args:
+    samples_jsonl: mmlu/high_school_geography/samples.jsonl
+  class: evals.elsuite.basic.match:Match
+match_mmlu_high_school_government_and_politics:
+  id: match_mmlu_high_school_government_and_politics.test.v1
+  metrics:
+  - accuracy
+match_mmlu_high_school_government_and_politics.test.v1:
+  args:
+    samples_jsonl: mmlu/high_school_government_and_politics/samples.jsonl
+  class: evals.elsuite.basic.match:Match
+match_mmlu_high_school_macroeconomics:
+  id: match_mmlu_high_school_macroeconomics.test.v1
+  metrics:
+  - accuracy
+match_mmlu_high_school_macroeconomics.test.v1:
+  args:
+    samples_jsonl: mmlu/high_school_macroeconomics/samples.jsonl
+  class: evals.elsuite.basic.match:Match
+match_mmlu_high_school_mathematics:
+  id: match_mmlu_high_school_mathematics.test.v1
+  metrics:
+  - accuracy
+match_mmlu_high_school_mathematics.test.v1:
+  args:
+    samples_jsonl: mmlu/high_school_mathematics/samples.jsonl
+  class: evals.elsuite.basic.match:Match
+match_mmlu_high_school_microeconomics:
+  id: match_mmlu_high_school_microeconomics.test.v1
+  metrics:
+  - accuracy
+match_mmlu_high_school_microeconomics.test.v1:
+  args:
+    samples_jsonl: mmlu/high_school_microeconomics/samples.jsonl
+  class: evals.elsuite.basic.match:Match
+match_mmlu_high_school_physics:
+  id: match_mmlu_high_school_physics.test.v1
+  metrics:
+  - accuracy
+match_mmlu_high_school_physics.test.v1:
+  args:
+    samples_jsonl: mmlu/high_school_physics/samples.jsonl
+  class: evals.elsuite.basic.match:Match
+match_mmlu_high_school_psychology:
+  id: match_mmlu_high_school_psychology.test.v1
+  metrics:
+  - accuracy
+match_mmlu_high_school_psychology.test.v1:
+  args:
+    samples_jsonl: mmlu/high_school_psychology/samples.jsonl
+  class: evals.elsuite.basic.match:Match
+match_mmlu_high_school_statistics:
+  id: match_mmlu_high_school_statistics.test.v1
+  metrics:
+  - accuracy
+match_mmlu_high_school_statistics.test.v1:
+  args:
+    samples_jsonl: mmlu/high_school_statistics/samples.jsonl
+  class: evals.elsuite.basic.match:Match
+match_mmlu_high_school_us_history:
+  id: match_mmlu_high_school_us_history.test.v1
+  metrics:
+  - accuracy
+match_mmlu_high_school_us_history.test.v1:
+  args:
+    samples_jsonl: mmlu/high_school_us_history/samples.jsonl
+  class: evals.elsuite.basic.match:Match
+match_mmlu_high_school_world_history:
+  id: match_mmlu_high_school_world_history.test.v1
+  metrics:
+  - accuracy
+match_mmlu_high_school_world_history.test.v1:
+  args:
+    samples_jsonl: mmlu/high_school_world_history/samples.jsonl
+  class: evals.elsuite.basic.match:Match
+match_mmlu_human_aging:
+  id: match_mmlu_human_aging.test.v1
+  metrics:
+  - accuracy
+match_mmlu_human_aging.test.v1:
+  args:
+    samples_jsonl: mmlu/human_aging/samples.jsonl
+  class: evals.elsuite.basic.match:Match
+match_mmlu_human_sexuality:
+  id: match_mmlu_human_sexuality.test.v1
+  metrics:
+  - accuracy
+match_mmlu_human_sexuality.test.v1:
+  args:
+    samples_jsonl: mmlu/human_sexuality/samples.jsonl
+  class: evals.elsuite.basic.match:Match
+match_mmlu_international_law:
+  id: match_mmlu_international_law.test.v1
+  metrics:
+  - accuracy
+match_mmlu_international_law.test.v1:
+  args:
+    samples_jsonl: mmlu/international_law/samples.jsonl
+  class: evals.elsuite.basic.match:Match
+match_mmlu_jurisprudence:
+  id: match_mmlu_jurisprudence.test.v1
+  metrics:
+  - accuracy
+match_mmlu_jurisprudence.test.v1:
+  args:
+    samples_jsonl: mmlu/jurisprudence/samples.jsonl
+  class: evals.elsuite.basic.match:Match
+match_mmlu_logical_fallacies:
+  id: match_mmlu_logical_fallacies.test.v1
+  metrics:
+  - accuracy
+match_mmlu_logical_fallacies.test.v1:
+  args:
+    samples_jsonl: mmlu/logical_fallacies/samples.jsonl
+  class: evals.elsuite.basic.match:Match
+match_mmlu_machine_learning:
+  id: match_mmlu_machine_learning.test.v1
+  metrics:
+  - accuracy
+match_mmlu_machine_learning.test.v1:
+  args:
+    samples_jsonl: mmlu/machine_learning/samples.jsonl
+  class: evals.elsuite.basic.match:Match
+match_mmlu_management:
+  id: match_mmlu_management.test.v1
+  metrics:
+  - accuracy
+match_mmlu_management.test.v1:
+  args:
+    samples_jsonl: mmlu/management/samples.jsonl
+  class: evals.elsuite.basic.match:Match
+match_mmlu_marketing:
+  id: match_mmlu_marketing.test.v1
+  metrics:
+  - accuracy
+match_mmlu_marketing.test.v1:
+  args:
+    samples_jsonl: mmlu/marketing/samples.jsonl
+  class: evals.elsuite.basic.match:Match
+match_mmlu_medical_genetics:
+  id: match_mmlu_medical_genetics.test.v1
+  metrics:
+  - accuracy
+match_mmlu_medical_genetics.test.v1:
+  args:
+    samples_jsonl: mmlu/medical_genetics/samples.jsonl
+  class: evals.elsuite.basic.match:Match
+match_mmlu_miscellaneous:
+  id: match_mmlu_miscellaneous.test.v1
+  metrics:
+  - accuracy
+match_mmlu_miscellaneous.test.v1:
+  args:
+    samples_jsonl: mmlu/miscellaneous/samples.jsonl
+  class: evals.elsuite.basic.match:Match
+match_mmlu_moral_disputes:
+  id: match_mmlu_moral_disputes.test.v1
+  metrics:
+  - accuracy
+match_mmlu_moral_disputes.test.v1:
+  args:
+    samples_jsonl: mmlu/moral_disputes/samples.jsonl
+  class: evals.elsuite.basic.match:Match
+match_mmlu_moral_scenarios:
+  id: match_mmlu_moral_scenarios.test.v1
+  metrics:
+  - accuracy
+match_mmlu_moral_scenarios.test.v1:
+  args:
+    samples_jsonl: mmlu/moral_scenarios/samples.jsonl
+  class: evals.elsuite.basic.match:Match
+match_mmlu_nutrition:
+  id: match_mmlu_nutrition.test.v1
+  metrics:
+  - accuracy
+match_mmlu_nutrition.test.v1:
+  args:
+    samples_jsonl: mmlu/nutrition/samples.jsonl
+  class: evals.elsuite.basic.match:Match
+match_mmlu_philosophy:
+  id: match_mmlu_philosophy.test.v1
+  metrics:
+  - accuracy
+match_mmlu_philosophy.test.v1:
+  args:
+    samples_jsonl: mmlu/philosophy/samples.jsonl
+  class: evals.elsuite.basic.match:Match
+match_mmlu_prehistory:
+  id: match_mmlu_prehistory.test.v1
+  metrics:
+  - accuracy
+match_mmlu_prehistory.test.v1:
+  args:
+    samples_jsonl: mmlu/prehistory/samples.jsonl
+  class: evals.elsuite.basic.match:Match
+match_mmlu_professional_accounting:
+  id: match_mmlu_professional_accounting.test.v1
+  metrics:
+  - accuracy
+match_mmlu_professional_accounting.test.v1:
+  args:
+    samples_jsonl: mmlu/professional_accounting/samples.jsonl
+  class: evals.elsuite.basic.match:Match
+match_mmlu_professional_law:
+  id: match_mmlu_professional_law.test.v1
+  metrics:
+  - accuracy
+match_mmlu_professional_law.test.v1:
+  args:
+    samples_jsonl: mmlu/professional_law/samples.jsonl
+  class: evals.elsuite.basic.match:Match
+match_mmlu_professional_medicine:
+  id: match_mmlu_professional_medicine.test.v1
+  metrics:
+  - accuracy
+match_mmlu_professional_medicine.test.v1:
+  args:
+    samples_jsonl: mmlu/professional_medicine/samples.jsonl
+  class: evals.elsuite.basic.match:Match
+match_mmlu_professional_psychology:
+  id: match_mmlu_professional_psychology.test.v1
+  metrics:
+  - accuracy
+match_mmlu_professional_psychology.test.v1:
+  args:
+    samples_jsonl: mmlu/professional_psychology/samples.jsonl
+  class: evals.elsuite.basic.match:Match
+match_mmlu_public_relations:
+  id: match_mmlu_public_relations.test.v1
+  metrics:
+  - accuracy
+match_mmlu_public_relations.test.v1:
+  args:
+    samples_jsonl: mmlu/public_relations/samples.jsonl
+  class: evals.elsuite.basic.match:Match
+match_mmlu_security_studies:
+  id: match_mmlu_security_studies.test.v1
+  metrics:
+  - accuracy
+match_mmlu_security_studies.test.v1:
+  args:
+    samples_jsonl: mmlu/security_studies/samples.jsonl
+  class: evals.elsuite.basic.match:Match
+match_mmlu_sociology:
+  id: match_mmlu_sociology.test.v1
+  metrics:
+  - accuracy
+match_mmlu_sociology.test.v1:
+  args:
+    samples_jsonl: mmlu/sociology/samples.jsonl
+  class: evals.elsuite.basic.match:Match
+match_mmlu_us_foreign_policy:
+  id: match_mmlu_us_foreign_policy.test.v1
+  metrics:
+  - accuracy
+match_mmlu_us_foreign_policy.test.v1:
+  args:
+    samples_jsonl: mmlu/us_foreign_policy/samples.jsonl
+  class: evals.elsuite.basic.match:Match
+match_mmlu_virology:
+  id: match_mmlu_virology.test.v1
+  metrics:
+  - accuracy
+match_mmlu_virology.test.v1:
+  args:
+    samples_jsonl: mmlu/virology/samples.jsonl
+  class: evals.elsuite.basic.match:Match
+match_mmlu_world_religions:
+  id: match_mmlu_world_religions.test.v1
+  metrics:
+  - accuracy
+match_mmlu_world_religions.test.v1:
+  args:
+    samples_jsonl: mmlu/world_religions/samples.jsonl
+  class: evals.elsuite.basic.match:Match
