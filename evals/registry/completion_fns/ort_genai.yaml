@@ -1,0 +1,16 @@
+# onnxruntime-genai local model completion functions.
+#
+# Usage (run inside the venv that has onnxruntime-genai + evals installed, with
+# the CUDA/cuDNN libs on LD_LIBRARY_PATH):
+#
+#   OPENAI_API_KEY=dummy EVALS_THREADS=1 \
+#     oaieval oss/gpt-oss-20b formal-logic
+#
+oss/gpt-oss-20b:
+  class: evals.completion_fns.ort_genai:ORTGenAICompletionFn
+  args:
+    model_path: /tianlei/models/gptoss20b_int4_qmoe_bs32_ropefix
+    execution_provider: cuda
+    max_new_tokens: 2048
+    do_sample: false
+    model_name: gpt-oss-20b
