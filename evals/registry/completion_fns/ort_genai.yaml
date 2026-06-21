@@ -12,5 +12,6 @@ oss/gpt-oss-20b:
     model_path: /tianlei/models/gptoss20b_int4_qmoe_bs32_ropefix
     execution_provider: cuda
     max_new_tokens: 2048
+    extract_letter_choice: true
     do_sample: false
     model_name: gpt-oss-20b

@@ -13,6 +13,7 @@ with multiple channels (analysis / commentary / final). Only the contents of the
 import json
 import logging
 import os
+import re
 import threading
 from typing import Any, Optional, Union
 
@@ -58,6 +59,13 @@ _WHITESPACE_TRANSLATION = {
     0xFEFF: "",  # zero-width no-break space / BOM
 }
 
+_LETTER_RE = re.compile(r"\b([ABCD])\b", re.IGNORECASE)
+_BRACKET_LETTER_RE = re.compile(r"\[\s*([ABCD])\s*\]", re.IGNORECASE)
+_ANSWER_MARKER_RE = re.compile(
+    r"(?:^|\n|\r)\s*(?:final\s+answer|answer|correct\s+answer)\s*[:\-]?\s*([ABCD])\b",
+    re.IGNORECASE,
+)
+
 
 def extract_final_channel(text: str) -> str:
     """Extract the user-facing answer from a harmony-formatted generation.
@@ -100,6 +108,27 @@ def extract_final_channel(text: str) -> str:
     return answer.strip()
 
 
+def extract_choice_letter(text: str) -> str:
+    """Extract a final A/B/C/D choice from model text.
+
+    Order of preference mirrors OpenAIChatToCompletionLetterFn:
+    explicit answer markers, bracketed option form, then last standalone token.
+    """
+    if not text:
+        return ""
+
+    marker = _ANSWER_MARKER_RE.findall(text)
+    if marker:
+        return marker[-1].upper()
+
+    bracket = _BRACKET_LETTER_RE.findall(text)
+    if bracket:
+        return bracket[-1].upper()
+
+    tokens = _LETTER_RE.findall(text)
+    return tokens[-1].upper() if tokens else ""
+
+
 class ORTGenAICompletionResult(CompletionResult):
     def __init__(self, completion: str, raw: str, prompt: Any):
         self.completion = completion
@@ -129,6 +158,7 @@ class ORTGenAICompletionFn(CompletionFn):
         model_path: str,
         execution_provider: str = "cuda",
         max_new_tokens: int = 2048,
+        extract_letter_choice: bool = False,
         do_sample: bool = False,
         temperature: float = 1.0,
         top_p: float = 1.0,
@@ -144,6 +174,7 @@ class ORTGenAICompletionFn(CompletionFn):
         self.model_path = model_path
         self.execution_provider = execution_provider
         self.max_new_tokens = int(max_new_tokens)
+        self.extract_letter_choice = bool(extract_letter_choice)
         self.do_sample = bool(do_sample)
         self.temperature = float(temperature)
         self.top_p = float(top_p)
@@ -234,6 +265,10 @@ class ORTGenAICompletionFn(CompletionFn):
         new_tokens = sequence[prompt_len:]
         raw = self.tokenizer.decode(new_tokens)
         answer = extract_final_channel(raw)
+        if self.extract_letter_choice:
+            extracted = extract_choice_letter(answer)
+            if extracted:
+                answer = extracted
 
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug("RAW completion: %r", raw)
