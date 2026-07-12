@@ -1,0 +1,16 @@
+match_gpqa_diamond:
+  id: match_gpqa_diamond.test.v1
+  metrics:
+  - accuracy
+match_gpqa_diamond.test.v1:
+  args:
+    samples_jsonl: gpqa/gpqa_diamond/samples.jsonl
+  class: evals.elsuite.basic.match:Match
+match_gpqa_main:
+  id: match_gpqa_main.test.v1
+  metrics:
+  - accuracy
+match_gpqa_main.test.v1:
+  args:
+    samples_jsonl: gpqa/gpqa_main/samples.jsonl
+  class: evals.elsuite.basic.match:Match

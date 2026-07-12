@@ -1,0 +1,120 @@
+match_mmlu_pro:
+  id: match_mmlu_pro.test.v1
+  metrics:
+  - accuracy
+match_mmlu_pro.test.v1:
+  args:
+    samples_jsonl: mmlu_pro/all/samples.jsonl
+  class: evals.elsuite.basic.match:Match
+match_mmlu_pro_biology:
+  id: match_mmlu_pro_biology.test.v1
+  metrics:
+  - accuracy
+match_mmlu_pro_biology.test.v1:
+  args:
+    samples_jsonl: mmlu_pro/biology/samples.jsonl
+  class: evals.elsuite.basic.match:Match
+match_mmlu_pro_business:
+  id: match_mmlu_pro_business.test.v1
+  metrics:
+  - accuracy
+match_mmlu_pro_business.test.v1:
+  args:
+    samples_jsonl: mmlu_pro/business/samples.jsonl
+  class: evals.elsuite.basic.match:Match
+match_mmlu_pro_chemistry:
+  id: match_mmlu_pro_chemistry.test.v1
+  metrics:
+  - accuracy
+match_mmlu_pro_chemistry.test.v1:
+  args:
+    samples_jsonl: mmlu_pro/chemistry/samples.jsonl
+  class: evals.elsuite.basic.match:Match
+match_mmlu_pro_computer_science:
+  id: match_mmlu_pro_computer_science.test.v1
+  metrics:
+  - accuracy
+match_mmlu_pro_computer_science.test.v1:
+  args:
+    samples_jsonl: mmlu_pro/computer_science/samples.jsonl
+  class: evals.elsuite.basic.match:Match
+match_mmlu_pro_economics:
+  id: match_mmlu_pro_economics.test.v1
+  metrics:
+  - accuracy
+match_mmlu_pro_economics.test.v1:
+  args:
+    samples_jsonl: mmlu_pro/economics/samples.jsonl
+  class: evals.elsuite.basic.match:Match
+match_mmlu_pro_engineering:
+  id: match_mmlu_pro_engineering.test.v1
+  metrics:
+  - accuracy
+match_mmlu_pro_engineering.test.v1:
+  args:
+    samples_jsonl: mmlu_pro/engineering/samples.jsonl
+  class: evals.elsuite.basic.match:Match
+match_mmlu_pro_health:
+  id: match_mmlu_pro_health.test.v1
+  metrics:
+  - accuracy
+match_mmlu_pro_health.test.v1:
+  args:
+    samples_jsonl: mmlu_pro/health/samples.jsonl
+  class: evals.elsuite.basic.match:Match
+match_mmlu_pro_history:
+  id: match_mmlu_pro_history.test.v1
+  metrics:
+  - accuracy
+match_mmlu_pro_history.test.v1:
+  args:
+    samples_jsonl: mmlu_pro/history/samples.jsonl
+  class: evals.elsuite.basic.match:Match
+match_mmlu_pro_law:
+  id: match_mmlu_pro_law.test.v1
+  metrics:
+  - accuracy
+match_mmlu_pro_law.test.v1:
+  args:
+    samples_jsonl: mmlu_pro/law/samples.jsonl
+  class: evals.elsuite.basic.match:Match
+match_mmlu_pro_math:
+  id: match_mmlu_pro_math.test.v1
+  metrics:
+  - accuracy
+match_mmlu_pro_math.test.v1:
+  args:
+    samples_jsonl: mmlu_pro/math/samples.jsonl
+  class: evals.elsuite.basic.match:Match
+match_mmlu_pro_other:
+  id: match_mmlu_pro_other.test.v1
+  metrics:
+  - accuracy
+match_mmlu_pro_other.test.v1:
+  args:
+    samples_jsonl: mmlu_pro/other/samples.jsonl
+  class: evals.elsuite.basic.match:Match
+match_mmlu_pro_philosophy:
+  id: match_mmlu_pro_philosophy.test.v1
+  metrics:
+  - accuracy
+match_mmlu_pro_philosophy.test.v1:
+  args:
+    samples_jsonl: mmlu_pro/philosophy/samples.jsonl
+  class: evals.elsuite.basic.match:Match
+match_mmlu_pro_physics:
+  id: match_mmlu_pro_physics.test.v1
+  metrics:
+  - accuracy
+match_mmlu_pro_physics.test.v1:
+  args:
+    samples_jsonl: mmlu_pro/physics/samples.jsonl
+  class: evals.elsuite.basic.match:Match
+match_mmlu_pro_psychology:
+  id: match_mmlu_pro_psychology.test.v1
+  metrics:
+  - accuracy
+match_mmlu_pro_psychology.test.v1:
+  args:
+    samples_jsonl: mmlu_pro/psychology/samples.jsonl
+  class: evals.elsuite.basic.match:Match

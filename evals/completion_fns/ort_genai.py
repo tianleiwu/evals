@@ -10,6 +10,7 @@ It was written to evaluate gpt-oss-20b, whose output uses the "harmony" format
 with multiple channels (analysis / commentary / final). Only the contents of the
 `final` channel are returned as the answer; see `extract_final_channel`.
 """
+import functools
 import json
 import logging
 import os
@@ -59,12 +60,22 @@ _WHITESPACE_TRANSLATION = {
     0xFEFF: "",  # zero-width no-break space / BOM
 }
 
-_LETTER_RE = re.compile(r"\b([ABCD])\b", re.IGNORECASE)
-_BRACKET_LETTER_RE = re.compile(r"\[\s*([ABCD])\s*\]", re.IGNORECASE)
-_ANSWER_MARKER_RE = re.compile(
-    r"(?:^|\n|\r)\s*(?:final\s+answer|answer|correct\s+answer)\s*[:\-]?\s*([ABCD])\b",
-    re.IGNORECASE,
-)
+
+@functools.lru_cache(maxsize=None)
+def _choice_regexes(choice_letters: str) -> tuple[re.Pattern, re.Pattern, re.Pattern]:
+    """Build (and cache) the answer-extraction regexes for a set of choice letters.
+
+    ``choice_letters`` is the contiguous letter set the task uses, e.g. "ABCD" for
+    a 4-way multiple choice or "ABCDEFGHIJ" for MMLU-Pro's up-to-10 options.
+    """
+    cls = "".join(dict.fromkeys(choice_letters.upper()))
+    letter = re.compile(rf"\b([{cls}])\b", re.IGNORECASE)
+    bracket = re.compile(rf"\[\s*([{cls}])\s*\]", re.IGNORECASE)
+    marker = re.compile(
+        rf"(?:^|\n|\r)\s*(?:final\s+answer|answer|correct\s+answer)\s*[:\-]?\s*([{cls}])\b",
+        re.IGNORECASE,
+    )
+    return letter, bracket, marker
 
 
 def extract_final_channel(text: str) -> str:
@@ -108,24 +119,28 @@ def extract_final_channel(text: str) -> str:
     return answer.strip()
 
 
-def extract_choice_letter(text: str) -> str:
-    """Extract a final A/B/C/D choice from model text.
+def extract_choice_letter(text: str, choice_letters: str = "ABCD") -> str:
+    """Extract a final multiple-choice letter from model text.
 
-    Order of preference mirrors OpenAIChatToCompletionLetterFn:
-    explicit answer markers, bracketed option form, then last standalone token.
+    ``choice_letters`` is the valid letter set (default "ABCD"; pass
+    "ABCDEFGHIJ" for MMLU-Pro). Order of preference mirrors
+    OpenAIChatToCompletionLetterFn: explicit answer markers, bracketed option
+    form, then the last standalone letter token.
     """
     if not text:
         return ""
 
-    marker = _ANSWER_MARKER_RE.findall(text)
+    letter_re, bracket_re, marker_re = _choice_regexes(choice_letters)
+
+    marker = marker_re.findall(text)
     if marker:
         return marker[-1].upper()
 
-    bracket = _BRACKET_LETTER_RE.findall(text)
+    bracket = bracket_re.findall(text)
     if bracket:
         return bracket[-1].upper()
 
-    tokens = _LETTER_RE.findall(text)
+    tokens = letter_re.findall(text)
     return tokens[-1].upper() if tokens else ""
 
 
@@ -159,6 +174,7 @@ class ORTGenAICompletionFn(CompletionFn):
         execution_provider: str = "cuda",
         max_new_tokens: int = 2048,
         extract_letter_choice: bool = False,
+        choice_letters: str = "ABCD",
         do_sample: bool = False,
         temperature: float = 1.0,
         top_p: float = 1.0,
@@ -175,6 +191,7 @@ class ORTGenAICompletionFn(CompletionFn):
         self.execution_provider = execution_provider
         self.max_new_tokens = int(max_new_tokens)
         self.extract_letter_choice = bool(extract_letter_choice)
+        self.choice_letters = str(choice_letters)
         self.do_sample = bool(do_sample)
         self.temperature = float(temperature)
         self.top_p = float(top_p)
@@ -266,7 +283,7 @@ class ORTGenAICompletionFn(CompletionFn):
         raw = self.tokenizer.decode(new_tokens)
         answer = extract_final_channel(raw)
         if self.extract_letter_choice:
-            extracted = extract_choice_letter(answer)
+            extracted = extract_choice_letter(answer, self.choice_letters)
             if extracted:
                 answer = extracted
 

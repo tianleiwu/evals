@@ -15,3 +15,29 @@ oss/gpt-oss-20b:
     extract_letter_choice: true
     do_sample: false
     model_name: gpt-oss-20b
+
+# 10-choice variant for MMLU-Pro (options can run A..J). Same model; only the
+# answer-letter extractor is widened and the generation budget raised so the
+# reasoning model can finish its chain-of-thought before the final channel.
+oss/gpt-oss-20b-mcq10:
+  class: evals.completion_fns.ort_genai:ORTGenAICompletionFn
+  args:
+    model_path: /tianlei/models/gptoss20b_int4_qmoe_bs32_ropefix
+    execution_provider: cuda
+    max_new_tokens: 4096
+    extract_letter_choice: true
+    choice_letters: ABCDEFGHIJ
+    do_sample: false
+    model_name: gpt-oss-20b
+
+# Free-form variant for MATH: no letter extraction (the grader parses the
+# \boxed{...} final answer), with a larger budget for long math derivations.
+oss/gpt-oss-20b-math:
+  class: evals.completion_fns.ort_genai:ORTGenAICompletionFn
+  args:
+    model_path: /tianlei/models/gptoss20b_int4_qmoe_bs32_ropefix
+    execution_provider: cuda
+    max_new_tokens: 4096
+    extract_letter_choice: false
+    do_sample: false
+    model_name: gpt-oss-20b
