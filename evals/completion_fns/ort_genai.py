@@ -181,6 +181,7 @@ class ORTGenAICompletionFn(CompletionFn):
         top_k: int = 1,
         system_prompt: Optional[str] = None,
         model_name: str = "gpt-oss-20b",
+        disable_thinking: bool = False,
         registry: Any = None,
         **kwargs,
     ):
@@ -198,6 +199,7 @@ class ORTGenAICompletionFn(CompletionFn):
         self.top_k = int(top_k)
         self.system_prompt = system_prompt
         self.model_name = model_name
+        self.disable_thinking = bool(disable_thinking)
 
         # Load the chat template shipped alongside the model, if present.
         self.template_str = ""
@@ -253,6 +255,14 @@ class ORTGenAICompletionFn(CompletionFn):
 
         messages = self._build_messages(prompt)
         full_prompt = self._apply_template(messages)
+        # Force Qwen3 non-thinking mode: the chat template appends a bare
+        # ``<think>\n`` after the assistant tag (enable_thinking defaults to true).
+        # Closing it with an empty block matches the template's enable_thinking=false
+        # output (``<think>\n\n</think>\n\n``) so the model answers directly.
+        if self.disable_thinking:
+            stripped = full_prompt.rstrip()
+            if stripped.endswith("<think>"):
+                full_prompt = stripped + "\n\n</think>\n\n"
         input_tokens = self.tokenizer.encode(full_prompt)
         prompt_len = len(input_tokens)
 
