@@ -91,3 +91,29 @@ qwen/qwen3.6-nvfp4-math:
     extract_letter_choice: false
     do_sample: false
     model_name: qwen3.6-nvfp4
+
+# Thinking-enabled free-form variant for AIME 2025 (grader parses \boxed{...}).
+qwen/qwen3.6-nvfp4-aime:
+  class: evals.completion_fns.ort_genai:ORTGenAICompletionFn
+  args:
+    model_path: /home/tianlei/models/qwen3.6_nvfp4_onnx
+    execution_provider: cuda
+    max_new_tokens: 32768
+    extract_letter_choice: false
+    do_sample: false
+    disable_thinking: false
+    model_name: qwen3.6-nvfp4-aime
+
+# Instruction-following (IFEval): grade the literal response, so no thinking.
+qwen/qwen3.6-nvfp4-ifeval:
+  class: evals.completion_fns.ort_genai:ORTGenAICompletionFn
+  args:
+    model_path: /home/tianlei/models/qwen3.6_nvfp4_onnx
+    execution_provider: cuda
+    max_new_tokens: 2048
+    extract_letter_choice: false
+    do_sample: false
+    disable_thinking: true
+    model_name: qwen3.6-nvfp4-ifeval
+
+

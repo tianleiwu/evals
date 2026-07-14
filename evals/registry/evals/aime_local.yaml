@@ -1,0 +1,8 @@
+aime_2025:
+  id: aime_2025.test.v1
+  metrics:
+  - accuracy
+aime_2025.test.v1:
+  args:
+    samples_jsonl: aime_2025/samples.jsonl
+  class: evals.elsuite.basic.math_match:MathMatch

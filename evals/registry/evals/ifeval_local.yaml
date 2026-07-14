@@ -1,0 +1,12 @@
+ifeval:
+  id: ifeval.test.v1
+  metrics:
+  - accuracy
+  - prompt_level_strict_acc
+  - inst_level_strict_acc
+  - prompt_level_loose_acc
+  - inst_level_loose_acc
+ifeval.test.v1:
+  args:
+    samples_jsonl: ifeval/samples.jsonl
+  class: evals.elsuite.ifeval.ifeval_eval:IFEval
