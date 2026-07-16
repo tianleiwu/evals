@@ -171,6 +171,7 @@ class ORTGenAICompletionFn(CompletionFn):
     def __init__(
         self,
         model_path: str,
+        mtp_model_path: Optional[str] = None,
         execution_provider: str = "cuda",
         max_new_tokens: int = 2048,
         extract_letter_choice: bool = False,
@@ -187,8 +188,11 @@ class ORTGenAICompletionFn(CompletionFn):
     ):
         if not os.path.isdir(model_path):
             raise ValueError(f"model_path is not a directory: {model_path}")
+        if mtp_model_path is not None and not os.path.isdir(mtp_model_path):
+            raise ValueError(f"mtp_model_path is not a directory: {mtp_model_path}")
 
         self.model_path = model_path
+        self.mtp_model_path = mtp_model_path
         self.execution_provider = execution_provider
         self.max_new_tokens = int(max_new_tokens)
         self.extract_letter_choice = bool(extract_letter_choice)
@@ -218,6 +222,7 @@ class ORTGenAICompletionFn(CompletionFn):
                 config.append_provider(execution_provider)
         self.model = og.Model(config)
         self.tokenizer = og.Tokenizer(self.model)
+        self.mtp_model = og.Model(mtp_model_path) if mtp_model_path is not None else None
 
         # A single shared model on one GPU cannot run concurrent generations
         # safely, so serialize generation across eval worker threads.
@@ -279,13 +284,23 @@ class ORTGenAICompletionFn(CompletionFn):
         with self._lock:
             params = og.GeneratorParams(self.model)
             params.set_search_options(**search_options)
-            generator = og.Generator(self.model, params)
+            generator = (
+                og.MtpGenerator(self.model, self.mtp_model, params)
+                if self.mtp_model is not None
+                else og.Generator(self.model, params)
+            )
             try:
                 generator.append_tokens(input_tokens)
-                target = generator.token_count() + self.max_new_tokens
-                while not generator.is_done() and generator.token_count() < target:
-                    generator.generate_next_token()
-                sequence = generator.get_sequence(0)
+                if self.mtp_model is not None:
+                    target = prompt_len + self.max_new_tokens
+                    while not generator.is_done() and len(generator.get_sequence()) < target:
+                        generator.generate_next_token()
+                    sequence = generator.get_sequence()
+                else:
+                    target = generator.token_count() + self.max_new_tokens
+                    while not generator.is_done() and generator.token_count() < target:
+                        generator.generate_next_token()
+                    sequence = generator.get_sequence(0)
             finally:
                 del generator
 

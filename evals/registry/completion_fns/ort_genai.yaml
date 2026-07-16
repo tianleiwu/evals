@@ -69,6 +69,20 @@ qwen/qwen3.6-nvfp4-think:
     disable_thinking: false
     model_name: qwen3.6-nvfp4-think
 
+# Thinking-enabled GPQA variant using the Qwen3.6 MTP head. Set
+# ORT_MTP_NUM_SPECULATIVE_TOKENS to select the draft count (recommended: 3).
+qwen/qwen3.6-nvfp4-mtp-think:
+  class: evals.completion_fns.ort_genai:ORTGenAICompletionFn
+  args:
+    model_path: /home/tianlei/models/qwen3.6_nvfp4_mtp_int8head_hs_onnx
+    mtp_model_path: /home/tianlei/models/qwen3.6_nvfp4_mtp_int8head_hs
+    execution_provider: follow_config
+    max_new_tokens: 32768
+    extract_letter_choice: true
+    do_sample: false
+    disable_thinking: false
+    model_name: qwen3.6-nvfp4-mtp-think
+
 # 10-choice variant for MMLU-Pro (options A..J), wider extractor + larger budget.
 qwen/qwen3.6-nvfp4-mcq10:
   class: evals.completion_fns.ort_genai:ORTGenAICompletionFn
