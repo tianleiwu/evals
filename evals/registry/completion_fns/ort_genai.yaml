@@ -110,6 +110,44 @@ qwen/qwen3.6-nvfp4-mtp-mcq10:
     disable_thinking: true
     model_name: qwen3.6-nvfp4-mtp-n3
 
+# Sampling gate (temp=0.7/top_p=0.8/top_k=20) for speculative-sampling MTP.
+# Plain-sampling baseline: the MTP MAIN model run WITHOUT the head (reference
+# distribution that MTP speculative sampling must match within 0.5% on MMLU-Pro).
+qwen/qwen3.6-nvfp4-mcq10-sample:
+  class: evals.completion_fns.ort_genai:ORTGenAICompletionFn
+  args:
+    model_path: /home/tianlei/models/qwen3.6_nvfp4_mtp_int8head_hs_onnx
+    execution_provider: follow_config
+    max_new_tokens: 4096
+    extract_letter_choice: true
+    choice_letters: ABCDEFGHIJ
+    do_sample: true
+    temperature: 0.7
+    top_p: 0.8
+    top_k: 20
+    disable_thinking: true
+    model_name: qwen3.6-nvfp4-sample
+
+# MTP N=3 speculative-SAMPLING variant (draft = sampled q_i, verify = rejection
+# sampling against p_i). Uses the standard graph-capable `_hs` main (no crop
+# arena; the sampling reject path re-runs decode-consistently). Set
+# ORT_MTP_NUM_SPECULATIVE_TOKENS=3 when evaluating.
+qwen/qwen3.6-nvfp4-mtp-mcq10-sample:
+  class: evals.completion_fns.ort_genai:ORTGenAICompletionFn
+  args:
+    model_path: /home/tianlei/models/qwen3.6_nvfp4_mtp_int8head_hs_onnx
+    mtp_model_path: /home/tianlei/models/qwen3.6_nvfp4_mtp_int8head_hs
+    execution_provider: follow_config
+    max_new_tokens: 4096
+    extract_letter_choice: true
+    choice_letters: ABCDEFGHIJ
+    do_sample: true
+    temperature: 0.7
+    top_p: 0.8
+    top_k: 20
+    disable_thinking: true
+    model_name: qwen3.6-nvfp4-mtp-n3-sample
+
 # Free-form variant for MATH (grader parses \boxed{...}), larger budget.
 qwen/qwen3.6-nvfp4-math:
   class: evals.completion_fns.ort_genai:ORTGenAICompletionFn
