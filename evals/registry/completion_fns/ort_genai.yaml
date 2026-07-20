@@ -117,10 +117,15 @@ qwen/qwen3.6-nvfp4-mcq10:
   args:
     model_path: /home/tianlei/models/qwen3.6_nvfp4_onnx
     execution_provider: cuda
-    max_new_tokens: 4096
+    max_new_tokens: 16384
     extract_letter_choice: true
     choice_letters: ABCDEFGHIJ
-    do_sample: false
+    do_sample: true
+    temperature: 1.0
+    top_p: 0.95
+    top_k: 32
+    repetition_penalty: 1.15
+    disable_thinking: false
     model_name: qwen3.6-nvfp4
 
 # MTP N=3 variant for MMLU-Pro. Set ORT_MTP_NUM_SPECULATIVE_TOKENS=3 and
@@ -210,5 +215,312 @@ qwen/qwen3.6-nvfp4-ifeval:
     do_sample: false
     disable_thinking: true
     model_name: qwen3.6-nvfp4-ifeval
+
+# ---------------------------------------------------------------------------
+# Qwen3.6-35B-A3B INT4 / INT8 candidates (quantized from the bf16 base checkpoint
+# Qwen/Qwen3.6-35B-A3B by the ORT GenAI model builder). MMLU-Pro (10-choice)
+# variants mirror qwen/qwen3.6-nvfp4-mcq10 exactly, changing only model_path so
+# the comparison against NVFP4 is apples-to-apples on the same harness/samples.
+# Each model_path is the plain text.onnx decoder dir (MTP head not used for MMLU).
+# ---------------------------------------------------------------------------
+qwen/qwen3.6-int4b32-mcq10:
+  class: evals.completion_fns.ort_genai:ORTGenAICompletionFn
+  args:
+    model_path: /home/tianlei/models/qwen3.6_int4_b32_onnx
+    execution_provider: cuda
+    max_new_tokens: 16384
+    extract_letter_choice: true
+    choice_letters: ABCDEFGHIJ
+    do_sample: true
+    temperature: 1.0
+    top_p: 0.95
+    top_k: 32
+    repetition_penalty: 1.15
+    disable_thinking: false
+    model_name: qwen3.6-int4b32
+
+qwen/qwen3.6-int4b64-mcq10:
+  class: evals.completion_fns.ort_genai:ORTGenAICompletionFn
+  args:
+    model_path: /home/tianlei/models/qwen3.6_int4_b64_onnx
+    execution_provider: cuda
+    max_new_tokens: 16384
+    extract_letter_choice: true
+    choice_letters: ABCDEFGHIJ
+    do_sample: true
+    temperature: 0.6
+    top_p: 0.95
+    top_k: 20
+    repetition_penalty: 1.15
+    disable_thinking: false
+    model_name: qwen3.6-int4b64
+
+qwen/qwen3.6-int8moe-mcq10:
+  class: evals.completion_fns.ort_genai:ORTGenAICompletionFn
+  args:
+    model_path: /home/tianlei/models/qwen3.6_int8moe_onnx
+    execution_provider: cuda
+    max_new_tokens: 16384
+    extract_letter_choice: true
+    choice_letters: ABCDEFGHIJ
+    do_sample: true
+    temperature: 1.0
+    top_p: 0.95
+    top_k: 32
+    repetition_penalty: 1.15
+    disable_thinking: false
+    model_name: qwen3.6-int8moe
+
+qwen/qwen3.6-int4b128-mcq10:
+  class: evals.completion_fns.ort_genai:ORTGenAICompletionFn
+  args:
+    model_path: /home/tianlei/models/qwen3.6_int4_b128_onnx
+    execution_provider: cuda
+    max_new_tokens: 16384
+    extract_letter_choice: true
+    choice_letters: ABCDEFGHIJ
+    do_sample: true
+    temperature: 0.6
+    top_p: 0.95
+    top_k: 20
+    repetition_penalty: 1.15
+    disable_thinking: false
+    model_name: qwen3.6-int4b128
+
+# ---------------------------------------------------------------------------
+# SMOKE variants (max_new_tokens=1024) for fast candidate screening on an
+# 800-sample MMLU-Pro pilot. The NVFP4 baseline gets a matching smoke fn so the
+# screen is apples-to-apples. Use the non-smoke (4096-token) fns above for the
+# full 12032-question run once a candidate recipe is finalized.
+# ---------------------------------------------------------------------------
+qwen/qwen3.6-nvfp4-mcq10-smoke:
+  class: evals.completion_fns.ort_genai:ORTGenAICompletionFn
+  args:
+    model_path: /home/tianlei/models/qwen3.6_nvfp4_onnx
+    execution_provider: cuda
+    max_new_tokens: 8192
+    extract_letter_choice: true
+    choice_letters: ABCDEFGHIJ
+    do_sample: true
+    temperature: 1.0
+    top_p: 0.95
+    top_k: 32
+    repetition_penalty: 1.15
+    disable_thinking: false
+    model_name: qwen3.6-nvfp4
+
+# nvfp4 MoE (direct-from-safetensor, lossless) + FP16 dense (attention/linear_attn/
+# shared_expert/lm_head/router kept fp16 via int4_nodes_to_exclude). Isolates whether
+# down-quantizing the dense path to int4 (vs NVIDIA's FP8 attention) is the accuracy loss.
+qwen/qwen3.6-nvfp4-fp16dense-mcq10-smoke:
+  class: evals.completion_fns.ort_genai:ORTGenAICompletionFn
+  args:
+    model_path: /home/tianlei/models_local/qwen3.6_nvfp4_fp16dense_onnx
+    execution_provider: cuda
+    max_new_tokens: 8192
+    extract_letter_choice: true
+    choice_letters: ABCDEFGHIJ
+    do_sample: true
+    temperature: 1.0
+    top_p: 0.95
+    top_k: 32
+    repetition_penalty: 1.15
+    disable_thinking: false
+    model_name: qwen3.6-nvfp4-fp16dense
+
+# nvfp4 MoE + INT8 dense (all dense MatMuls int8 via json quant_config; router +
+# shared_expert_gate stay fp16). Smaller than fp16-dense; tests 8-bit dense accuracy.
+qwen/qwen3.6-nvfp4-int8dense-mcq10-smoke:
+  class: evals.completion_fns.ort_genai:ORTGenAICompletionFn
+  args:
+    model_path: /home/tianlei/models_local/qwen3.6_nvfp4_int8dense_onnx
+    execution_provider: cuda
+    max_new_tokens: 8192
+    extract_letter_choice: true
+    choice_letters: ABCDEFGHIJ
+    do_sample: true
+    temperature: 1.0
+    top_p: 0.95
+    top_k: 32
+    repetition_penalty: 1.15
+    disable_thinking: false
+    model_name: qwen3.6-nvfp4-int8dense
+
+# nvfp4 MoE + FP8 attention/linear-attention projections loaded directly from the
+# NVIDIA ModelOpt checkpoint (GemmFloat8 for attn + linear_attn); remaining dense
+# matmuls follow the model precision recipe.
+qwen/qwen3.6-nvfp4-fp8attn-mcq10-smoke:
+  class: evals.completion_fns.ort_genai:ORTGenAICompletionFn
+  args:
+    model_path: /home/tianlei/models_local/qwen3.6_nvfp4_fp8attn_onnx
+    execution_provider: cuda
+    max_new_tokens: 8192
+    extract_letter_choice: true
+    choice_letters: ABCDEFGHIJ
+    do_sample: true
+    temperature: 1.0
+    top_p: 0.95
+    top_k: 32
+    repetition_penalty: 1.15
+    disable_thinking: false
+    model_name: qwen3.6-nvfp4-fp8attn
+
+# nvfp4 MoE (QMoE) + shared_expert/lm_head NVFP4 (MatMulBlockScaledFp4) + fp8
+# attention q/k/v/o (MatMulBlockScaledFp8, single-block per-tensor scale) loaded
+# directly from the NVIDIA ModelOpt checkpoint; linear_attn + router + gates fp16.
+qwen/qwen3.6-nvfp4-fp8dense-mcq10-smoke:
+  class: evals.completion_fns.ort_genai:ORTGenAICompletionFn
+  args:
+    model_path: /home/tianlei/models_local/qwen3.6_nvfp4_fp8_dense_onnx
+    execution_provider: cuda
+    max_new_tokens: 8192
+    extract_letter_choice: true
+    choice_letters: ABCDEFGHIJ
+    do_sample: true
+    temperature: 1.0
+    top_p: 0.95
+    top_k: 32
+    repetition_penalty: 1.15
+    disable_thinking: false
+    model_name: qwen3.6-nvfp4-fp8dense
+
+# Same as qwen3.6-nvfp4-fp8dense but WITHOUT repetition_penalty (1.0). Mirrors the
+# vLLM no-rep run to test whether rep_penalty is the source of the gap to fp16.
+qwen/qwen3.6-nvfp4-fp8dense-norep-mcq10-smoke:
+  class: evals.completion_fns.ort_genai:ORTGenAICompletionFn
+  args:
+    model_path: /home/tianlei/models_local/qwen3.6_nvfp4_fp8_dense_onnx
+    execution_provider: cuda
+    max_new_tokens: 8192
+    extract_letter_choice: true
+    choice_letters: ABCDEFGHIJ
+    do_sample: true
+    temperature: 1.0
+    top_p: 0.95
+    top_k: 32
+    repetition_penalty: 1.0
+    disable_thinking: false
+    model_name: qwen3.6-nvfp4-fp8dense-norep
+
+qwen/qwen3.6-int4b32-mcq10-smoke:
+  class: evals.completion_fns.ort_genai:ORTGenAICompletionFn
+  args:
+    model_path: /home/tianlei/models/qwen3.6_int4_b32_onnx
+    execution_provider: cuda
+    max_new_tokens: 8192
+    extract_letter_choice: true
+    choice_letters: ABCDEFGHIJ
+    do_sample: true
+    temperature: 1.0
+    top_p: 0.95
+    top_k: 32
+    repetition_penalty: 1.15
+    disable_thinking: false
+    model_name: qwen3.6-int4b32
+
+# Higher repetition_penalty test: the residual ~9% of samples that still fall
+# into a "TheTheThe"/"HereHere" degeneration loop at rp=1.15 need a stronger
+# penalty to escape. Same 8192 budget (loops fill any budget, so raising it
+# does not help; breaking the loop does).
+qwen/qwen3.6-int4b32-mcq10-smoke-rp13:
+  class: evals.completion_fns.ort_genai:ORTGenAICompletionFn
+  args:
+    model_path: /home/tianlei/models/qwen3.6_int4_b32_onnx
+    execution_provider: cuda
+    max_new_tokens: 8192
+    extract_letter_choice: true
+    choice_letters: ABCDEFGHIJ
+    do_sample: true
+    temperature: 0.6
+    top_p: 0.95
+    top_k: 20
+    repetition_penalty: 1.3
+    disable_thinking: false
+    model_name: qwen3.6-int4b32
+
+qwen/qwen3.6-int4b64-mcq10-smoke:
+  class: evals.completion_fns.ort_genai:ORTGenAICompletionFn
+  args:
+    model_path: /home/tianlei/models/qwen3.6_int4_b64_onnx
+    execution_provider: cuda
+    max_new_tokens: 8192
+    extract_letter_choice: true
+    choice_letters: ABCDEFGHIJ
+    do_sample: true
+    temperature: 0.6
+    top_p: 0.95
+    top_k: 20
+    repetition_penalty: 1.15
+    disable_thinking: false
+    model_name: qwen3.6-int4b64
+
+qwen/qwen3.6-int8moe-mcq10-smoke:
+  class: evals.completion_fns.ort_genai:ORTGenAICompletionFn
+  args:
+    model_path: /home/tianlei/models/qwen3.6_int8moe_onnx
+    execution_provider: cuda
+    max_new_tokens: 8192
+    extract_letter_choice: true
+    choice_letters: ABCDEFGHIJ
+    do_sample: true
+    temperature: 1.0
+    top_p: 0.95
+    top_k: 32
+    repetition_penalty: 1.15
+    disable_thinking: false
+    model_name: qwen3.6-int8moe
+
+qwen/qwen3.6-int4b128-mcq10-smoke:
+  class: evals.completion_fns.ort_genai:ORTGenAICompletionFn
+  args:
+    model_path: /home/tianlei/models/qwen3.6_int4_b128_onnx
+    execution_provider: cuda
+    max_new_tokens: 8192
+    extract_letter_choice: true
+    choice_letters: ABCDEFGHIJ
+    do_sample: true
+    temperature: 0.6
+    top_p: 0.95
+    top_k: 20
+    repetition_penalty: 1.15
+    disable_thinking: false
+    model_name: qwen3.6-int4b128
+
+# ---------------------------------------------------------------------------
+# FP16 BASELINE (fully unquantized: plain fp16 MoE + fp16 MatMuls + fp16 lm_head,
+# built with `-p fp16` from the bf16 base checkpoint Qwen/Qwen3.6-35B-A3B). This
+# isolates whether the MMLU-Pro gap vs the NVIDIA ~85% reference is caused by
+# weight quantization (int4/nvfp4) or by the harness/sampling. No MTP head.
+# Sampling per user (2026-07-19): temperature=1.0, top_k=32, top_p=0.95.
+# ---------------------------------------------------------------------------
+qwen/qwen3.6-fp16-mcq10:
+  class: evals.completion_fns.ort_genai:ORTGenAICompletionFn
+  args:
+    model_path: /home/tianlei/models_local/qwen3.6_fp16_onnx
+    execution_provider: cuda
+    max_new_tokens: 16384
+    extract_letter_choice: true
+    choice_letters: ABCDEFGHIJ
+    do_sample: true
+    temperature: 1.0
+    top_p: 0.95
+    top_k: 32
+    disable_thinking: false
+    model_name: qwen3.6-fp16
+
+qwen/qwen3.6-fp16-mcq10-smoke:
+  class: evals.completion_fns.ort_genai:ORTGenAICompletionFn
+  args:
+    model_path: /home/tianlei/models_local/qwen3.6_fp16_onnx
+    execution_provider: cuda
+    max_new_tokens: 8192
+    extract_letter_choice: true
+    choice_letters: ABCDEFGHIJ
+    do_sample: true
+    temperature: 1.0
+    top_p: 0.95
+    top_k: 32
+    disable_thinking: false
+    model_name: qwen3.6-fp16
 
 

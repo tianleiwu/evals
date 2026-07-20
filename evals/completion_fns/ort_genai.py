@@ -218,6 +218,7 @@ class ORTGenAICompletionFn(CompletionFn):
         temperature: float = 1.0,
         top_p: float = 1.0,
         top_k: int = 1,
+        repetition_penalty: float = 1.0,
         system_prompt: Optional[str] = None,
         model_name: str = "gpt-oss-20b",
         disable_thinking: bool = False,
@@ -240,6 +241,7 @@ class ORTGenAICompletionFn(CompletionFn):
         self.temperature = float(temperature)
         self.top_p = float(top_p)
         self.top_k = int(top_k)
+        self.repetition_penalty = float(repetition_penalty)
         self.system_prompt = system_prompt
         self.model_name = model_name
         self.disable_thinking = bool(disable_thinking)
@@ -330,6 +332,11 @@ class ORTGenAICompletionFn(CompletionFn):
             search_options["temperature"] = self.temperature
             search_options["top_p"] = self.top_p
             search_options["top_k"] = self.top_k
+        # Repetition penalty (>1.0) suppresses degenerate loops that aggressively
+        # quantized (int4/int8) reasoning models can fall into inside the <think>
+        # block. Applied for both greedy and sampled decoding.
+        if self.repetition_penalty and self.repetition_penalty != 1.0:
+            search_options["repetition_penalty"] = self.repetition_penalty
 
         with self._lock:
             params = og.GeneratorParams(self.model)
