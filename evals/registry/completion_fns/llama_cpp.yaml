@@ -1,0 +1,61 @@
+# llama.cpp (llama-server) local model completion functions.
+#
+# Each eval worker process spawns its own llama-server bound to the GPU selected
+# by CUDA_VISIBLE_DEVICES, so run_evals_parallel.sh shards unchanged:
+#
+#   OPENAI_API_KEY=dummy EVALS_THREADS=1 \
+#     oaieval llamacpp/gpt-oss-20b-think match_gpqa_diamond
+#
+llamacpp/gpt-oss-20b:
+  class: evals.completion_fns.llama_cpp:LlamaCppCompletionFn
+  args:
+    model_path: /home/tianlei/models/gguf/gpt-oss-20b-MXFP4.gguf
+    server_binary: /home/tianlei/git/llama.cpp/build_cu130/bin/llama-server
+    n_gpu_layers: 99
+    ctx_size: 131072
+    max_new_tokens: 2048
+    extract_letter_choice: true
+    do_sample: false
+    model_name: gpt-oss-20b-llamacpp
+
+# High-reasoning-effort variant for GPQA-diamond (matches oss/gpt-oss-20b-think).
+llamacpp/gpt-oss-20b-think:
+  class: evals.completion_fns.llama_cpp:LlamaCppCompletionFn
+  args:
+    model_path: /home/tianlei/models/gguf/gpt-oss-20b-MXFP4.gguf
+    server_binary: /home/tianlei/git/llama.cpp/build_cu130/bin/llama-server
+    n_gpu_layers: 99
+    ctx_size: 131072
+    max_new_tokens: 32768
+    extract_letter_choice: true
+    do_sample: false
+    reasoning_effort: high
+    model_name: gpt-oss-20b-llamacpp-think
+
+# 10-choice (MMLU-Pro) flavour of the high-effort variant.
+llamacpp/gpt-oss-20b-think-mcq10:
+  class: evals.completion_fns.llama_cpp:LlamaCppCompletionFn
+  args:
+    model_path: /home/tianlei/models/gguf/gpt-oss-20b-MXFP4.gguf
+    server_binary: /home/tianlei/git/llama.cpp/build_cu130/bin/llama-server
+    n_gpu_layers: 99
+    ctx_size: 131072
+    max_new_tokens: 32768
+    extract_letter_choice: true
+    choice_letters: ABCDEFGHIJ
+    do_sample: false
+    reasoning_effort: high
+    model_name: gpt-oss-20b-llamacpp-think
+
+# Free-form variant (MATH / AIME / IFEval): no letter extraction.
+llamacpp/gpt-oss-20b-math:
+  class: evals.completion_fns.llama_cpp:LlamaCppCompletionFn
+  args:
+    model_path: /home/tianlei/models/gguf/gpt-oss-20b-MXFP4.gguf
+    server_binary: /home/tianlei/git/llama.cpp/build_cu130/bin/llama-server
+    n_gpu_layers: 99
+    ctx_size: 131072
+    max_new_tokens: 16384
+    extract_letter_choice: false
+    do_sample: false
+    model_name: gpt-oss-20b-llamacpp

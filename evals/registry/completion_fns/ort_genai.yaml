@@ -42,6 +42,34 @@ oss/gpt-oss-20b-math:
     do_sample: false
     model_name: gpt-oss-20b
 
+# High-reasoning-effort variant for GPQA-diamond. The harmony chat template
+# defaults to `reasoning: medium`; `reasoning_effort: high` rewrites that
+# default and the budget is raised so the longer CoT is not truncated.
+# Point model_path at the RC under test via --completion_args.
+oss/gpt-oss-20b-think:
+  class: evals.completion_fns.ort_genai:ORTGenAICompletionFn
+  args:
+    model_path: /home/tianlei/gpt_oss_rc_models/rc1
+    execution_provider: cuda
+    max_new_tokens: 32768
+    extract_letter_choice: true
+    do_sample: false
+    reasoning_effort: high
+    model_name: gpt-oss-20b-think
+
+# 10-choice (MMLU-Pro) flavour of the high-effort variant.
+oss/gpt-oss-20b-think-mcq10:
+  class: evals.completion_fns.ort_genai:ORTGenAICompletionFn
+  args:
+    model_path: /home/tianlei/gpt_oss_rc_models/rc1
+    execution_provider: cuda
+    max_new_tokens: 32768
+    extract_letter_choice: true
+    choice_letters: ABCDEFGHIJ
+    do_sample: false
+    reasoning_effort: high
+    model_name: gpt-oss-20b-think
+
 # ---------------------------------------------------------------------------
 # Qwen3.6-35B-A3B-NVFP4 (Model Optimizer NVFP4 experts -> ORT QMoE quant_type=nvfp4).
 # Point model_path at the Olive-built text model dir (contains genai_config.json).

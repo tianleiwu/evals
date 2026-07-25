@@ -61,6 +61,42 @@ _WHITESPACE_TRANSLATION = {
 }
 
 
+# gpt-oss harmony templates render the reasoning budget as
+#     {%- if reasoning_effort is not defined %}
+#         {%- set reasoning_effort = "medium" %}
+#     {%- endif %}
+#     {{- "Reasoning: " + reasoning_effort + "\n\n" }}
+# The genai `apply_chat_template` binding does not accept extra template
+# variables, so the effort level is injected by rewriting that default.
+_REASONING_EFFORT_RE = re.compile(
+    r"(\{%-?\s*set\s+reasoning_effort\s*=\s*)(\"[^\"]*\"|'[^']*')"
+)
+_REASONING_EFFORT_LEVELS = ("low", "medium", "high")
+
+
+def set_template_reasoning_effort(template_str: str, effort: str) -> str:
+    """Return ``template_str`` with its default ``reasoning_effort`` replaced.
+
+    Raises ValueError for an unknown level; logs a warning (and returns the
+    template unchanged) when the template has no reasoning_effort default.
+    """
+    level = effort.strip().lower()
+    if level not in _REASONING_EFFORT_LEVELS:
+        raise ValueError(
+            f"reasoning_effort must be one of {_REASONING_EFFORT_LEVELS}, got {effort!r}"
+        )
+    patched, count = _REASONING_EFFORT_RE.subn(rf'\g<1>"{level}"', template_str)
+    if count == 0:
+        logger.warning(
+            "chat template has no `set reasoning_effort` default; "
+            "reasoning_effort=%s was not applied",
+            level,
+        )
+        return template_str
+    logger.info("chat template: reasoning_effort=%s (%d site(s))", level, count)
+    return patched
+
+
 @functools.lru_cache(maxsize=None)
 def _choice_regexes(choice_letters: str) -> tuple[re.Pattern, re.Pattern, re.Pattern]:
     """Build (and cache) the answer-extraction regexes for a set of choice letters.
@@ -166,6 +202,8 @@ class ORTGenAICompletionFn(CompletionFn):
         temperature/top_p/top_k: Sampling options (only used when do_sample).
         system_prompt: Optional system message prepended to chat prompts.
         model_name: Label recorded in the eval logs.
+        reasoning_effort: For harmony/gpt-oss templates, override the default
+            reasoning budget ("low", "medium" or "high").
     """
 
     def __init__(
@@ -183,6 +221,7 @@ class ORTGenAICompletionFn(CompletionFn):
         system_prompt: Optional[str] = None,
         model_name: str = "gpt-oss-20b",
         disable_thinking: bool = False,
+        reasoning_effort: Optional[str] = None,
         registry: Any = None,
         **kwargs,
     ):
@@ -204,6 +243,7 @@ class ORTGenAICompletionFn(CompletionFn):
         self.system_prompt = system_prompt
         self.model_name = model_name
         self.disable_thinking = bool(disable_thinking)
+        self.reasoning_effort = reasoning_effort
 
         # Load the chat template shipped alongside the model, if present.
         self.template_str = ""
@@ -211,6 +251,16 @@ class ORTGenAICompletionFn(CompletionFn):
         if os.path.exists(jinja_path):
             with open(jinja_path, encoding="utf-8") as f:
                 self.template_str = f.read()
+
+        if reasoning_effort:
+            if not self.template_str:
+                raise ValueError(
+                    "reasoning_effort requires a chat_template.jinja in model_path: "
+                    f"{model_path}"
+                )
+            self.template_str = set_template_reasoning_effort(
+                self.template_str, reasoning_effort
+            )
 
         logger.info(
             "Loading ONNX model from %s (provider=%s)", model_path, execution_provider
