@@ -328,6 +328,26 @@ qwen/qwen3.6-nvfp4-fp16dense-mcq10-smoke:
     disable_thinking: false
     model_name: qwen3.6-nvfp4-fp16dense
 
+# Same as qwen3.6-nvfp4-fp16dense but WITHOUT repetition_penalty (1.0). Isolation
+# probe: fp16 attn + fp16 dense + nvfp4 QMoE experts is the ONLY quantized path
+# left (QMoE). If this loops no-rep like fp8dense-norep, the nvfp4 QMoE kernel is
+# the repetition source; if robust, the culprit is FP8-attn and/or NVFP4-dense.
+qwen/qwen3.6-nvfp4-fp16dense-norep-mcq10-smoke:
+  class: evals.completion_fns.ort_genai:ORTGenAICompletionFn
+  args:
+    model_path: /home/tianlei/models_local/qwen3.6_nvfp4_fp16dense_onnx
+    execution_provider: cuda
+    max_new_tokens: 8192
+    extract_letter_choice: true
+    choice_letters: ABCDEFGHIJ
+    do_sample: true
+    temperature: 1.0
+    top_p: 0.95
+    top_k: 32
+    repetition_penalty: 1.0
+    disable_thinking: false
+    model_name: qwen3.6-nvfp4-fp16dense-norep
+
 # nvfp4 MoE + INT8 dense (all dense MatMuls int8 via json quant_config; router +
 # shared_expert_gate stay fp16). Smaller than fp16-dense; tests 8-bit dense accuracy.
 qwen/qwen3.6-nvfp4-int8dense-mcq10-smoke:
@@ -401,6 +421,99 @@ qwen/qwen3.6-nvfp4-fp8dense-norep-mcq10-smoke:
     repetition_penalty: 1.0
     disable_thinking: false
     model_name: qwen3.6-nvfp4-fp8dense-norep
+
+# fp8dense but FP8 attention activations quantized with the checkpoint's static
+# calibrated per-tensor input_scale (ModelOpt W8A8 / vLLM scheme) instead of dynamic
+# absmax. No repetition_penalty -> mirrors the vLLM no-rep run (82.9%) to test whether
+# the calibrated activation scale closes the ORT->vLLM gap. Sanity: 0/21 greedy loops.
+qwen/qwen3.6-nvfp4-statscale-norep-mcq10-smoke:
+  class: evals.completion_fns.ort_genai:ORTGenAICompletionFn
+  args:
+    model_path: /home/tianlei/models_local/qwen3.6_nvfp4_fp8dense_statscale_onnx
+    execution_provider: cuda
+    max_new_tokens: 8192
+    extract_letter_choice: true
+    choice_letters: ABCDEFGHIJ
+    do_sample: true
+    temperature: 1.0
+    top_p: 0.95
+    top_k: 32
+    repetition_penalty: 1.0
+    disable_thinking: false
+    model_name: qwen3.6-nvfp4-statscale-norep
+
+qwen/qwen3.6-nvfp4-statscale-fp8kv-norep-mcq10-smoke:
+  class: evals.completion_fns.ort_genai:ORTGenAICompletionFn
+  args:
+    model_path: /home/tianlei/models_local/qwen3.6_nvfp4_fp8dense_statscale_fp8kv_onnx
+    execution_provider: cuda
+    max_new_tokens: 8192
+    extract_letter_choice: true
+    choice_letters: ABCDEFGHIJ
+    do_sample: true
+    temperature: 1.0
+    top_p: 0.95
+    top_k: 32
+    repetition_penalty: 1.0
+    disable_thinking: false
+    model_name: qwen3.6-nvfp4-statscale-fp8kv-norep
+
+# MTP (multi-token prediction) self-speculative decoding variant of the statscale
+# final candidate. main = statscale nvfp4 model (with hidden_states output);
+# mtp_model = int8-quantized 1-layer MTP draft head. GREEDY decoding (do_sample=false)
+# is used because MTP argmax verification makes the accepted-token sequence LOSSLESS
+# vs the base model's greedy output -- so accuracy must equal base-greedy while
+# throughput improves on structured content (~1.05-1.15x). This entry evaluates that
+# the MTP draft/verify loop preserves MMLU-Pro quality.
+# Base statscale GREEDY (no MTP) -- control for the MTP-greedy run, to check whether a
+# low greedy MMLU-Pro score is a greedy artifact (base==MTP, MTP lossless) or an MTP bug.
+qwen/qwen3.6-nvfp4-statscale-greedy-mcq10-smoke:
+  class: evals.completion_fns.ort_genai:ORTGenAICompletionFn
+  args:
+    model_path: /home/tianlei/models_local/qwen3.6_nvfp4_fp8dense_statscale_onnx
+    execution_provider: cuda
+    max_new_tokens: 8192
+    extract_letter_choice: true
+    choice_letters: ABCDEFGHIJ
+    do_sample: false
+    repetition_penalty: 1.0
+    disable_thinking: false
+    model_name: qwen3.6-nvfp4-statscale-greedy
+
+qwen/qwen3.6-nvfp4-statscale-mtp-greedy-mcq10-smoke:
+  class: evals.completion_fns.ort_genai:ORTGenAICompletionFn
+  args:
+    model_path: /home/tianlei/models_local/qwen3.6_nvfp4_fp8dense_statscale_mtp_int8head_onnx
+    mtp_model_path: /home/tianlei/models_local/qwen3.6_nvfp4_fp8dense_statscale_mtp_int8head
+    execution_provider: cuda
+    max_new_tokens: 8192
+    extract_letter_choice: true
+    choice_letters: ABCDEFGHIJ
+    do_sample: false
+    repetition_penalty: 1.0
+    disable_thinking: false
+    model_name: qwen3.6-nvfp4-statscale-mtp-greedy
+
+# MTP + FP8 KV cache, SAMPLING, graph ON (validates the recurrent-state double-buffer fix on the
+# full vLLM-style + MTP config). Same sampling params as the plain statscale sampling run
+# (temp 1.0 / top_p 0.95 / top_k 32 / no rep) for apples-to-apples vs the 82.9% plain baseline.
+# main model enable_cuda_graph=1 (head runs eager). Set ORT_MTP_NUM_SPECULATIVE_TOKENS=3.
+qwen/qwen3.6-nvfp4-statscale-mtp-fp8kv-sample-mcq10-smoke:
+  class: evals.completion_fns.ort_genai:ORTGenAICompletionFn
+  args:
+    model_path: /home/tianlei/models_local/qwen3.6_nvfp4_fp8dense_statscale_mtp_int8head_fp8kv_onnx
+    mtp_model_path: /home/tianlei/models_local/qwen3.6_nvfp4_fp8dense_statscale_mtp_int8head_fp8kv
+    execution_provider: follow_config
+    max_new_tokens: 8192
+    extract_letter_choice: true
+    choice_letters: ABCDEFGHIJ
+    do_sample: true
+    temperature: 1.0
+    top_p: 0.95
+    top_k: 32
+    repetition_penalty: 1.0
+    disable_thinking: false
+    model_name: qwen3.6-nvfp4-statscale-mtp-fp8kv-sample
 
 qwen/qwen3.6-int4b32-mcq10-smoke:
   class: evals.completion_fns.ort_genai:ORTGenAICompletionFn
@@ -524,3 +637,71 @@ qwen/qwen3.6-fp16-mcq10-smoke:
     model_name: qwen3.6-fp16
 
 
+
+# ---------------------------------------------------------------------------
+# v5: statscale models rebuilt against the renamed ORT contrib ops
+# (MatMulBlockQuantizedFp4Weight / MatMulBlockQuantizedFp8Weight). The FP8
+# attention matmul now takes the FP16 activation plus a scalar a_scale and does
+# the static W8A8 quantize/dequantize inside the kernel, so the serialized graph
+# no longer carries the FP8Act preprocessing chain. CUDA graph is ON in both
+# genai_configs. Used for GPQA-diamond (4 choices, A-D) with sampling.
+# ---------------------------------------------------------------------------
+qwen/qwen3.6-nvfp4-statscale-v5-gpqa:
+  class: evals.completion_fns.ort_genai:ORTGenAICompletionFn
+  args:
+    model_path: /home/tianlei/models_local/qwen3.6_nvfp4_fp8dense_statscale_v5_onnx
+    execution_provider: follow_config
+    max_new_tokens: 32768
+    extract_letter_choice: true
+    choice_letters: ABCD
+    do_sample: true
+    temperature: 1.0
+    top_p: 0.95
+    top_k: 32
+    repetition_penalty: 1.0
+    disable_thinking: false
+    model_name: qwen3.6-nvfp4-statscale-v5
+
+# MTP + fp8-KV (N=3) v5. Export ORT_MTP_NUM_SPECULATIVE_TOKENS=3 before running.
+qwen/qwen3.6-nvfp4-statscale-mtp-fp8kv-v5-gpqa:
+  class: evals.completion_fns.ort_genai:ORTGenAICompletionFn
+  args:
+    model_path: /home/tianlei/models_local/qwen3.6_nvfp4_fp8dense_statscale_mtp_int8head_fp8kv_v5_onnx
+    mtp_model_path: /home/tianlei/models_local/qwen3.6_nvfp4_fp8dense_statscale_mtp_int8head_fp8kv_v5
+    execution_provider: follow_config
+    max_new_tokens: 32768
+    extract_letter_choice: true
+    choice_letters: ABCD
+    do_sample: true
+    temperature: 1.0
+    top_p: 0.95
+    top_k: 32
+    repetition_penalty: 1.0
+    disable_thinking: false
+    model_name: qwen3.6-nvfp4-statscale-mtp-fp8kv-v5
+
+# ---------------------------------------------------------------------------
+# v6: same as v5 except the MTP head is now genuinely INT8 end-to-end. In v4/v5
+# `mtp_head_quant_type=int8` only reached the head's QMoE experts; its dense
+# MatMuls (mtp.fc, attn q/k/v/o, shared expert, draft lm_head) were still int4
+# MatMulNBits. The builder now maps the head quant type to the head's onnx_dtype
+# too, so those are `MatMulNBits bits=8`. The main model is unchanged from v5, so
+# the plain baseline is `qwen/qwen3.6-nvfp4-statscale-v5-gpqa`.
+# Export ORT_MTP_NUM_SPECULATIVE_TOKENS=3 before running.
+# ---------------------------------------------------------------------------
+qwen/qwen3.6-nvfp4-statscale-mtp-fp8kv-v6-gpqa:
+  class: evals.completion_fns.ort_genai:ORTGenAICompletionFn
+  args:
+    model_path: /home/tianlei/models_local/qwen3.6_nvfp4_fp8dense_statscale_mtp_int8head_fp8kv_v6_onnx
+    mtp_model_path: /home/tianlei/models_local/qwen3.6_nvfp4_fp8dense_statscale_mtp_int8head_fp8kv_v6
+    execution_provider: follow_config
+    max_new_tokens: 32768
+    extract_letter_choice: true
+    choice_letters: ABCD
+    do_sample: true
+    temperature: 1.0
+    top_p: 0.95
+    top_k: 32
+    repetition_penalty: 1.0
+    disable_thinking: false
+    model_name: qwen3.6-nvfp4-statscale-mtp-fp8kv-v6
