@@ -1,0 +1,71 @@
+match_gpqa_diamond_s0:
+  id: match_gpqa_diamond_s0.test.v1
+  metrics:
+  - accuracy
+match_gpqa_diamond_s0.test.v1:
+  args:
+    samples_jsonl: gpqa/gpqa_diamond_s0/samples.jsonl
+  class: evals.elsuite.basic.match:Match
+
+match_gpqa_diamond_s1:
+  id: match_gpqa_diamond_s1.test.v1
+  metrics:
+  - accuracy
+match_gpqa_diamond_s1.test.v1:
+  args:
+    samples_jsonl: gpqa/gpqa_diamond_s1/samples.jsonl
+  class: evals.elsuite.basic.match:Match
+
+match_gpqa_diamond_s2:
+  id: match_gpqa_diamond_s2.test.v1
+  metrics:
+  - accuracy
+match_gpqa_diamond_s2.test.v1:
+  args:
+    samples_jsonl: gpqa/gpqa_diamond_s2/samples.jsonl
+  class: evals.elsuite.basic.match:Match
+
+match_gpqa_diamond_s3:
+  id: match_gpqa_diamond_s3.test.v1
+  metrics:
+  - accuracy
+match_gpqa_diamond_s3.test.v1:
+  args:
+    samples_jsonl: gpqa/gpqa_diamond_s3/samples.jsonl
+  class: evals.elsuite.basic.match:Match
+
+match_gpqa_diamond_s4:
+  id: match_gpqa_diamond_s4.test.v1
+  metrics:
+  - accuracy
+match_gpqa_diamond_s4.test.v1:
+  args:
+    samples_jsonl: gpqa/gpqa_diamond_s4/samples.jsonl
+  class: evals.elsuite.basic.match:Match
+
+match_gpqa_diamond_s5:
+  id: match_gpqa_diamond_s5.test.v1
+  metrics:
+  - accuracy
+match_gpqa_diamond_s5.test.v1:
+  args:
+    samples_jsonl: gpqa/gpqa_diamond_s5/samples.jsonl
+  class: evals.elsuite.basic.match:Match
+
+match_gpqa_diamond_s6:
+  id: match_gpqa_diamond_s6.test.v1
+  metrics:
+  - accuracy
+match_gpqa_diamond_s6.test.v1:
+  args:
+    samples_jsonl: gpqa/gpqa_diamond_s6/samples.jsonl
+  class: evals.elsuite.basic.match:Match
+
+match_gpqa_diamond_s7:
+  id: match_gpqa_diamond_s7.test.v1
+  metrics:
+  - accuracy
+match_gpqa_diamond_s7.test.v1:
+  args:
+    samples_jsonl: gpqa/gpqa_diamond_s7/samples.jsonl
+  class: evals.elsuite.basic.match:Match

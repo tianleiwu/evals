@@ -705,3 +705,19 @@ qwen/qwen3.6-nvfp4-statscale-mtp-fp8kv-v6-gpqa:
     repetition_penalty: 1.0
     disable_thinking: false
     model_name: qwen3.6-nvfp4-statscale-mtp-fp8kv-v6
+
+qwen/qwen3.6-27b-nvfp4-gpqa:
+  class: evals.completion_fns.ort_genai:ORTGenAICompletionFn
+  args:
+    model_path: /home/tianlei/models_local/qwen3.6_27b_nvfp4_fp8dense_statscale_onnx
+    execution_provider: follow_config
+    max_new_tokens: 16384
+    extract_letter_choice: true
+    choice_letters: ABCD
+    do_sample: true
+    temperature: 1.0
+    top_p: 0.95
+    top_k: 32
+    repetition_penalty: 1.0
+    disable_thinking: false
+    model_name: qwen3.6-27b-nvfp4
