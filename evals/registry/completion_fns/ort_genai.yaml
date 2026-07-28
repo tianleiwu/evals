@@ -712,6 +712,15 @@ qwen/qwen3.6-27b-nvfp4-gpqa:
     model_path: /home/tianlei/models_local/qwen3.6_27b_nvfp4_fp8dense_statscale_onnx
     execution_provider: follow_config
     max_new_tokens: 16384
+    model_name: qwen3.6-27b-nvfp4
+    
+qwen/qwen3.6-nvfp4-statscale-mtp-fp8kv-v7-gpqa:
+  class: evals.completion_fns.ort_genai:ORTGenAICompletionFn
+  args:
+    model_path: /home/tianlei/models_local/qwen3.6_nvfp4_fp8dense_statscale_mtp_int8head_fp8kv_v7_stateall_onnx
+    mtp_model_path: /home/tianlei/models_local/qwen3.6_nvfp4_fp8dense_statscale_mtp_int8head_fp8kv_v7_stateall
+    execution_provider: follow_config
+    max_new_tokens: 32768
     extract_letter_choice: true
     choice_letters: ABCD
     do_sample: true
@@ -720,4 +729,24 @@ qwen/qwen3.6-27b-nvfp4-gpqa:
     top_k: 32
     repetition_penalty: 1.0
     disable_thinking: false
-    model_name: qwen3.6-27b-nvfp4
+    model_name: qwen3.6-nvfp4-statscale-mtp-fp8kv-v7
+
+# v10: state_window=4 (W = N+1 for N=3, the minimum the crop needs) with the window
+# axis LEADING the batch axis: past/present state is [W, B, ...]. Same math as v7/v8/v9,
+# half the state memory of v9's W=8.
+qwen/qwen3.6-nvfp4-statscale-mtp-fp8kv-v10-gpqa:
+  class: evals.completion_fns.ort_genai:ORTGenAICompletionFn
+  args:
+    model_path: /home/tianlei/models_local/qwen3.6_nvfp4_fp8dense_statscale_mtp_int8head_fp8kv_v10_w4_onnx
+    mtp_model_path: /home/tianlei/models_local/qwen3.6_nvfp4_fp8dense_statscale_mtp_int8head_fp8kv_v10_w4
+    execution_provider: follow_config
+    max_new_tokens: 32768
+    extract_letter_choice: true
+    choice_letters: ABCD
+    do_sample: true
+    temperature: 1.0
+    top_p: 0.95
+    top_k: 32
+    repetition_penalty: 1.0
+    disable_thinking: false
+    model_name: qwen3.6-nvfp4-statscale-mtp-fp8kv-v10
