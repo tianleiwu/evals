@@ -180,6 +180,21 @@ def extract_choice_letter(text: str, choice_letters: str = "ABCD") -> str:
     return tokens[-1].upper() if tokens else ""
 
 
+def _is_paged_model(model_path: str) -> bool:
+    """True if the model was built with use_paged_attention=true.
+
+    The genai model builder emits a ``block_table`` decoder input for paged
+    models and for no other configuration, so it is a reliable marker.
+    """
+    config_path = os.path.join(model_path, "genai_config.json")
+    try:
+        with open(config_path, encoding="utf-8") as f:
+            config = json.load(f)
+        return "block_table" in config["model"]["decoder"]["inputs"]
+    except (OSError, KeyError, ValueError):
+        return False
+
+
 class ORTGenAICompletionResult(CompletionResult):
     def __init__(self, completion: str, raw: str, prompt: Any):
         self.completion = completion
@@ -276,9 +291,43 @@ class ORTGenAICompletionFn(CompletionFn):
         self.tokenizer = og.Tokenizer(self.model)
         self.mtp_model = og.Model(mtp_model_path) if mtp_model_path is not None else None
 
+        # PagedAttention models are only drivable through the continuous-batching
+        # Engine API; og.Generator rejects them with
+        #   "Invalid rank for input: input_ids Got: 2 Expected: 1".
+        # The block_table decoder input is the marker the model builder emits for
+        # use_paged_attention=true.
+        self.use_engine = _is_paged_model(model_path)
+        self.engine = og.Engine(self.model) if self.use_engine else None
+        if self.use_engine:
+            logger.info("PagedAttention model detected; using og.Engine")
+
         # A single shared model on one GPU cannot run concurrent generations
         # safely, so serialize generation across eval worker threads.
         self._lock = threading.Lock()
+
+    def _generate_engine(self, input_tokens: list[int], search_options: dict) -> list[int]:
+        """Run one request through the continuous-batching engine (paged models)."""
+        options = {k: v for k, v in search_options.items() if k != "batch_size"}
+        params = og.GeneratorParams(self.model)
+        params.set_search_options(**options)
+        request = og.Request(params)
+        request.add_tokens(input_tokens)
+
+        self.engine.add_request(request)
+        new_tokens: list[int] = []
+        removed = False
+        try:
+            while served := self.engine.step():
+                while served.has_unseen_tokens():
+                    new_tokens.append(served.get_unseen_token())
+                if served.is_done():
+                    self.engine.remove_request(served)
+                    removed = True
+                    break
+        finally:
+            if not removed:
+                self.engine.remove_request(request)
+        return new_tokens
 
     def _build_messages(self, prompt: Union[str, OpenAICreateChatPrompt]) -> list[dict]:
         if is_chat_prompt(prompt):
@@ -339,27 +388,31 @@ class ORTGenAICompletionFn(CompletionFn):
             search_options["repetition_penalty"] = self.repetition_penalty
 
         with self._lock:
-            params = og.GeneratorParams(self.model)
-            params.set_search_options(**search_options)
-            generator = (
-                og.MtpGenerator(self.model, self.mtp_model, params)
-                if self.mtp_model is not None
-                else og.Generator(self.model, params)
-            )
-            try:
-                generator.append_tokens(input_tokens)
-                if self.mtp_model is not None:
-                    target = prompt_len + self.max_new_tokens
-                    while not generator.is_done() and len(generator.get_sequence()) < target:
-                        generator.generate_next_token()
-                    sequence = generator.get_sequence()
-                else:
-                    target = generator.token_count() + self.max_new_tokens
-                    while not generator.is_done() and generator.token_count() < target:
-                        generator.generate_next_token()
-                    sequence = generator.get_sequence(0)
-            finally:
-                del generator
+            if self.use_engine:
+                new_tokens = self._generate_engine(input_tokens, search_options)
+                sequence = list(input_tokens) + new_tokens
+            else:
+                params = og.GeneratorParams(self.model)
+                params.set_search_options(**search_options)
+                generator = (
+                    og.MtpGenerator(self.model, self.mtp_model, params)
+                    if self.mtp_model is not None
+                    else og.Generator(self.model, params)
+                )
+                try:
+                    generator.append_tokens(input_tokens)
+                    if self.mtp_model is not None:
+                        target = prompt_len + self.max_new_tokens
+                        while not generator.is_done() and len(generator.get_sequence()) < target:
+                            generator.generate_next_token()
+                        sequence = generator.get_sequence()
+                    else:
+                        target = generator.token_count() + self.max_new_tokens
+                        while not generator.is_done() and generator.token_count() < target:
+                            generator.generate_next_token()
+                        sequence = generator.get_sequence(0)
+                finally:
+                    del generator
 
         new_tokens = sequence[prompt_len:]
         raw = self.tokenizer.decode(new_tokens)

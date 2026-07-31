@@ -118,3 +118,11 @@ match_mmlu_pro_psychology.test.v1:
   args:
     samples_jsonl: mmlu_pro/psychology/samples.jsonl
   class: evals.elsuite.basic.match:Match
+match_mmlu_pro_800:
+  id: match_mmlu_pro_800.test.v1
+  metrics:
+  - accuracy
+match_mmlu_pro_800.test.v1:
+  args:
+    samples_jsonl: mmlu_pro/sub800/samples.jsonl
+  class: evals.elsuite.basic.match:Match
