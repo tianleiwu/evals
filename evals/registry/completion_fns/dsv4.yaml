@@ -80,3 +80,17 @@ dsv4/flash-0731-paged-cg-mcq10:
     extract_letter_choice: true
     choice_letters: ABCDEFGHIJ
     model_name: deepseek-v4-flash-0731
+
+# Same as flash-0731-paged-cg-mcq10 but exported with the fused
+# com.microsoft.SinkhornNormalize op, which drops 9,976 nodes from the graph.
+dsv4/flash-0731-paged-sk-mcq10:
+  class: evals.completion_fns.dsv4:DSV4CompletionFn
+  args:
+    model_path: /home/tianlei/dsv4_onnx_paged_sk
+    checkpoint: /home/tianlei/git/DeepSeek-V4-Flash-0731
+    world: 8
+    max_new_tokens: 32
+    thinking_mode: chat
+    extract_letter_choice: true
+    choice_letters: ABCDEFGHIJ
+    model_name: deepseek-v4-flash-0731
