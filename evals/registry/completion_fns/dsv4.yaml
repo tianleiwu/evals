@@ -1,0 +1,82 @@
+# DeepSeek-V4-Flash-0731, served as an 8-rank ONNX export by
+# examples/python/deepseek_v4_flash_0731/dsv4_engine.py in onnxruntime-genai.
+#
+# The model occupies every GPU on the node, so run a single worker:
+#
+#   OPENAI_API_KEY=dummy EVALS_THREADS=1 \
+#     oaieval dsv4/flash-0731-mcq10 match_mmlu_pro_800
+#
+# `model_path` is the export directory holding rank_<r>/; `checkpoint` is the HF
+# checkpoint, used only for its tokenizer and its `encoding/` prompt format.
+
+dsv4/flash-0731:
+  class: evals.completion_fns.dsv4:DSV4CompletionFn
+  args:
+    model_path: /home/tianlei/dsv4_onnx
+    checkpoint: /home/tianlei/git/DeepSeek-V4-Flash-0731
+    world: 8
+    max_new_tokens: 64
+    thinking_mode: chat
+    model_name: deepseek-v4-flash-0731
+
+# 10-choice variant for MMLU-Pro (options run A..J). The eval's own system
+# message already asks for a bare letter, so the budget stays small.
+dsv4/flash-0731-mcq10:
+  class: evals.completion_fns.dsv4:DSV4CompletionFn
+  args:
+    model_path: /home/tianlei/dsv4_onnx
+    checkpoint: /home/tianlei/git/DeepSeek-V4-Flash-0731
+    world: 8
+    max_new_tokens: 32
+    thinking_mode: chat
+    extract_letter_choice: true
+    choice_letters: ABCDEFGHIJ
+    model_name: deepseek-v4-flash-0731
+
+# Reasoning variant: the model emits <think>...</think> before answering, so the
+# budget must cover the chain of thought. The export's context bound is 4096, and
+# the engine truncates the generation rather than overrunning the KV cache.
+dsv4/flash-0731-think-mcq10:
+  class: evals.completion_fns.dsv4:DSV4CompletionFn
+  args:
+    model_path: /home/tianlei/dsv4_onnx
+    checkpoint: /home/tianlei/git/DeepSeek-V4-Flash-0731
+    world: 8
+    max_new_tokens: 3072
+    thinking_mode: thinking
+    reasoning_effort: low
+    extract_letter_choice: true
+    choice_letters: ABCDEFGHIJ
+    model_name: deepseek-v4-flash-0731-think
+
+# Paged export (PagedAttention + Lightning Indexer), 10-choice MMLU-Pro variant.
+# Same decode settings as dsv4/flash-0731-mcq10 so the two are directly
+# comparable: any accuracy gap is the paged path, not the sampling budget.
+dsv4/flash-0731-paged-mcq10:
+  class: evals.completion_fns.dsv4:DSV4CompletionFn
+  args:
+    model_path: /home/tianlei/dsv4_onnx_paged
+    checkpoint: /home/tianlei/git/DeepSeek-V4-Flash-0731
+    world: 8
+    max_new_tokens: 32
+    thinking_mode: chat
+    extract_letter_choice: true
+    choice_letters: ABCDEFGHIJ
+    model_name: deepseek-v4-flash-0731
+
+# The capture-ready paged export: same graph as dsv4/flash-0731-paged-mcq10 plus
+# the device-resident sequence length that removes the last MemcpyFromHost node,
+# so the decode step is eligible for CUDA Graphs. Set DSV4_CUDA_GRAPH=1 to have
+# the engine replay a captured decode; leaving it unset runs the same model
+# normally, which is the control the graph run has to match.
+dsv4/flash-0731-paged-cg-mcq10:
+  class: evals.completion_fns.dsv4:DSV4CompletionFn
+  args:
+    model_path: /home/tianlei/dsv4_onnx_paged_cg
+    checkpoint: /home/tianlei/git/DeepSeek-V4-Flash-0731
+    world: 8
+    max_new_tokens: 32
+    thinking_mode: chat
+    extract_letter_choice: true
+    choice_letters: ABCDEFGHIJ
+    model_name: deepseek-v4-flash-0731
