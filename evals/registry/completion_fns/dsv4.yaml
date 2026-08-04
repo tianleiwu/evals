@@ -94,3 +94,111 @@ dsv4/flash-0731-paged-sk-mcq10:
     extract_letter_choice: true
     choice_letters: ABCDEFGHIJ
     model_name: deepseek-v4-flash-0731
+
+# Same as flash-0731-paged-sk-mcq10 but exported with the fused
+# com.microsoft.HyperConnectionMix op, which drops another 3,655 nodes.
+dsv4/flash-0731-paged-hc-mcq10:
+  class: evals.completion_fns.dsv4:DSV4CompletionFn
+  args:
+    model_path: /home/tianlei/dsv4_onnx_paged_hc
+    checkpoint: /home/tianlei/git/DeepSeek-V4-Flash-0731
+    world: 8
+    max_new_tokens: 32
+    thinking_mode: chat
+    extract_letter_choice: true
+    choice_letters: ABCDEFGHIJ
+    model_name: deepseek-v4-flash-0731
+
+# Same as flash-0731-paged-hc-mcq10 but exported with the fused
+# com.microsoft.DSV4Compressor op, which drops another 5,445 nodes.
+dsv4/flash-0731-paged-comp-mcq10:
+  class: evals.completion_fns.dsv4:DSV4CompletionFn
+  args:
+    model_path: /home/tianlei/dsv4_onnx_paged_comp
+    checkpoint: /home/tianlei/git/DeepSeek-V4-Flash-0731
+    world: 8
+    max_new_tokens: 32
+    thinking_mode: chat
+    extract_letter_choice: true
+    choice_letters: ABCDEFGHIJ
+    model_name: deepseek-v4-flash-0731
+
+# Same as flash-0731-paged-comp-mcq10 but exported with the fused
+# com.microsoft.LightningIndexer op, which drops another 1,357 nodes.
+dsv4/flash-0731-paged-idx-mcq10:
+  class: evals.completion_fns.dsv4:DSV4CompletionFn
+  args:
+    model_path: /home/tianlei/dsv4_onnx_paged_idx
+    checkpoint: /home/tianlei/git/DeepSeek-V4-Flash-0731
+    world: 8
+    max_new_tokens: 32
+    thinking_mode: chat
+    extract_letter_choice: true
+    choice_letters: ABCDEFGHIJ
+    model_name: deepseek-v4-flash-0731
+
+# Same as flash-0731-paged-idx-mcq10 but exported with the fused
+# com.microsoft.DSV4QKVNormRope and com.microsoft.DSV4InvRopeGroup ops, which
+# take the norm/rope/quant plumbing on both sides of attention down to two nodes
+# per layer.
+dsv4/flash-0731-paged-qkv-mcq10:
+  class: evals.completion_fns.dsv4:DSV4CompletionFn
+  args:
+    model_path: /home/tianlei/dsv4_onnx_paged_qkv
+    checkpoint: /home/tianlei/git/DeepSeek-V4-Flash-0731
+    world: 8
+    max_new_tokens: 32
+    thinking_mode: chat
+    extract_letter_choice: true
+    choice_letters: ABCDEFGHIJ
+    model_name: deepseek-v4-flash-0731
+
+# Same as flash-0731-paged-qkv-mcq10 but exported with the fused
+# com.microsoft.DSV4MoERouter and com.microsoft.DSV4SwiGLU ops, which take the
+# MoE routing decision and the shared expert's activation down to one node each.
+dsv4/flash-0731-paged-moe-mcq10:
+  class: evals.completion_fns.dsv4:DSV4CompletionFn
+  args:
+    model_path: /home/tianlei/dsv4_onnx_paged_moe
+    checkpoint: /home/tianlei/git/DeepSeek-V4-Flash-0731
+    world: 8
+    batch: 8
+    max_new_tokens: 32
+    thinking_mode: chat
+    extract_letter_choice: true
+    choice_letters: ABCDEFGHIJ
+    model_name: deepseek-v4-flash-0731
+
+# The same export sharded over four GPUs instead of eight.  Decode is latency
+# bound, so half the node runs a batch of 8 at ~92% of the eight-GPU rate, which
+# lets the other four GPUs benchmark or evaluate at the same time.  Point the
+# second job at the other half with DSV4_DEVICES=4,5,6,7 and give it its own
+# port and log_dir.
+dsv4/flash-0731-paged-moe-w4-mcq10:
+  class: evals.completion_fns.dsv4:DSV4CompletionFn
+  args:
+    model_path: /home/tianlei/dsv4_onnx_paged_moe_w4
+    checkpoint: /home/tianlei/git/DeepSeek-V4-Flash-0731
+    world: 4
+    batch: 8
+    port: 19565
+    max_new_tokens: 32
+    thinking_mode: chat
+    extract_letter_choice: true
+    choice_letters: ABCDEFGHIJ
+    model_name: deepseek-v4-flash-0731
+
+# The pre-Step-5 baseline (DSV4QKVNormRope export) with the same batched runner,
+# for checking that batching itself does not move the score.
+dsv4/flash-0731-paged-qkv-batch8-mcq10:
+  class: evals.completion_fns.dsv4:DSV4CompletionFn
+  args:
+    model_path: /home/tianlei/dsv4_onnx_paged_qkv
+    checkpoint: /home/tianlei/git/DeepSeek-V4-Flash-0731
+    world: 8
+    batch: 8
+    max_new_tokens: 32
+    thinking_mode: chat
+    extract_letter_choice: true
+    choice_letters: ABCDEFGHIJ
+    model_name: deepseek-v4-flash-0731
