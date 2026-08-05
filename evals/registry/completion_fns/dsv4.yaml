@@ -117,6 +117,20 @@ dsv4/flash-0731-it11c-mcq10:
     choice_letters: ABCDEFGHIJ
     model_name: deepseek-v4-flash-0731
 
+# it16: the float32 island drained out of the decode path -- RMSNorm and the MoE
+# combine now run in bfloat16, removing ~174 Cast nodes per step.
+dsv4/flash-0731-it16-mcq10:
+  class: evals.completion_fns.dsv4:DSV4CompletionFn
+  args:
+    model_path: /home/tianlei/dsv4_onnx_it16
+    checkpoint: /home/tianlei/git/DeepSeek-V4-Flash-0731
+    world: 8
+    max_new_tokens: 32
+    thinking_mode: chat
+    extract_letter_choice: true
+    choice_letters: ABCDEFGHIJ
+    model_name: deepseek-v4-flash-0731
+
 # it15: vocabulary-sharded LM head. Each rank owns 1/world of head.weight and the
 # slices are reunified by a zero pad plus an AllReduce, so the logits are the same
 # numbers the replicated head produced.
